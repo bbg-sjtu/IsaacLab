@@ -24,7 +24,7 @@ from isaaclab.app import AppLauncher
 
 # add argparse arguments
 parser = argparse.ArgumentParser(description="Tutorial on using the operational space controller.")
-parser.add_argument("--num_envs", type=int, default=128, help="Number of environments to spawn.")
+parser.add_argument("--num_envs", type=int, default=1, help="Number of environments to spawn.")
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
 # parse the arguments
@@ -313,6 +313,7 @@ def update_states(
     """
     # obtain dynamics related quantities from simulation
     ee_jacobi_idx = ee_frame_idx - 1
+    # 解释为什么要减1:PhysX 返回的 Jacobian 通常不包含 root body 的 Jacobian，或者说 root body 不需要对自身 articulation joints 求 Jacobian。对于 articulation 的 root body，例如 Franka 的 panda_link0，它通常是机械臂的基座。对于固定基座机械臂，它本身不由 arm joints 驱动，所以没有必要给它计算一份关于 arm joints 的 body Jacobian。因此 PhysX 的 Jacobian 列表从第一个非 root body 开始。
     jacobian_w = robot.root_physx_view.get_jacobians()[:, ee_jacobi_idx, :, arm_joint_ids]
     mass_matrix = robot.root_physx_view.get_generalized_mass_matrices()[:, arm_joint_ids, :][:, :, arm_joint_ids]
     gravity = robot.root_physx_view.get_gravity_compensation_forces()[:, arm_joint_ids]

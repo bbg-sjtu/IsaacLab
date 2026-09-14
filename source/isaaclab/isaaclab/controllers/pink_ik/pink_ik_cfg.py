@@ -8,7 +8,7 @@
 from dataclasses import MISSING
 
 from pink.tasks import FrameTask
-
+from pink.tasks import Task
 from isaaclab.utils import configclass
 
 
@@ -36,7 +36,10 @@ class PinkIKControllerCfg:
     The last ``num_hand_joints`` values of the action are the hand joint angles.
     """
 
-    variable_input_tasks: list[FrameTask] = MISSING
+    num_posture_controlled_joints: int = MISSING
+    """The number of joints controlled by the null space posture task."""
+
+    variable_input_tasks: list[Task] = MISSING
     """A list of tasks for the Pink IK controller.
 
     These tasks are controllable by the environment action.
@@ -45,7 +48,7 @@ class PinkIKControllerCfg:
     For more details, visit: https://github.com/stephane-caron/pink
     """
 
-    fixed_input_tasks: list[FrameTask] = MISSING
+    fixed_input_tasks: list[Task] = MISSING
     """
     A list of tasks for the Pink IK controller. These tasks are fixed and not controllable by the env action.
 

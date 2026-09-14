@@ -15,7 +15,9 @@ import isaaclab.utils.math as math_utils
 from isaaclab.assets.articulation import Articulation
 from isaaclab.controllers.pink_ik import PinkIKController
 from isaaclab.controllers.pink_ik.local_frame_task import LocalFrameTask
+from isaaclab.controllers.pink_ik.null_space_posture_task import NullSpacePostureTask
 from isaaclab.managers.action_manager import ActionTerm
+import numpy as np
 
 if TYPE_CHECKING:
     from isaaclab.envs import ManagerBasedEnv
@@ -123,6 +125,11 @@ class PinkInverseKinematicsAction(ActionTerm):
     def hand_joint_dim(self) -> int:
         """Dimension for hand joint positions."""
         return self.cfg.controller.num_hand_joints
+    
+    @property
+    def posture_controlled_joint_dim(self) -> int:
+        """Dimension for controlled posture joint positions."""
+        return self.cfg.controller.num_posture_controlled_joints
 
     @property
     def position_dim(self) -> int:
@@ -364,3 +371,157 @@ class PinkInverseKinematicsAction(ActionTerm):
             env_ids: A list of environment IDs to reset. If None, all environments are reset.
         """
         self._raw_actions[env_ids] = torch.zeros(self.action_dim, device=self.device)
+
+class PinkInverseKinematicsAction_NOHAND(PinkInverseKinematicsAction):
+    def __init__(self, cfg: pink_actions_cfg.PinkInverseKinematicsActionCfg, env: ManagerBasedEnv):
+        super().__init__(cfg, env)
+    
+    def process_actions(self, actions: torch.Tensor) -> None:
+        """Process the input actions and set targets for each task.
+
+        Args:
+            actions: The input actions tensor.
+        """
+        # Store raw actions
+        self._raw_actions[:] = actions
+
+        # Extract hand joint positions directly (no cloning needed)
+        # self._target_hand_joint_positions = actions[:, -self.hand_joint_dim :]
+
+        # Get base link frame transformation
+        self.base_link_frame_in_world_rf = self._get_base_link_frame_transform()
+
+        # Process controlled frame poses (pass original actions, no clone needed)
+        controlled_frame_poses = self._extract_controlled_frame_poses(actions)
+        transformed_poses = self._transform_poses_to_base_link_frame(controlled_frame_poses)
+
+        # Set targets for all tasks
+        self._set_task_targets(controlled_frame_poses, transformed_poses)
+
+    def apply_actions(self) -> None:
+        """Apply the computed joint positions based on the inverse kinematics solution."""
+        # Compute IK solutions for all environments
+        ik_joint_positions = self._compute_ik_solutions()
+
+        # Combine IK and hand joint positions
+        # all_joint_positions = torch.cat((ik_joint_positions, self._target_hand_joint_positions), dim=1)
+        self._processed_actions = ik_joint_positions
+
+        # Apply gravity compensation to arm joints
+        if self.cfg.enable_gravity_compensation:
+            self._apply_gravity_compensation()
+
+        # Apply joint position targets
+        self._asset.set_joint_position_target(self._processed_actions, self._controlled_joint_ids)
+
+    def _set_task_targets(self, poses_env: torch.Tensor, poses_base: tuple[torch.Tensor, torch.Tensor]) -> None:
+        positions_env, rotations_env = math_utils.unmake_pose(poses_env)
+        positions_base, rotations_base = poses_base
+
+        for env_index, ik_controller in enumerate(self._ik_controllers):
+            for frame_task_index, task in enumerate(ik_controller.cfg.variable_input_tasks):
+
+                if isinstance(task, LocalFrameTask):
+                    target = task.transform_target_to_base
+                    positions = positions_base
+                    rotations = rotations_base
+
+                elif isinstance(task, FrameTask):
+                    target = task.transform_target_to_world
+                    positions = positions_env
+                    rotations = rotations_env
+
+                else:
+                    continue
+
+                target.translation = positions[frame_task_index, env_index, :].cpu().numpy()
+                target.rotation = rotations[frame_task_index, env_index, :, :].cpu().numpy()
+                task.set_target(target)
+
+class PinkInverseKinematicsAction_NullSpacePostureControl(PinkInverseKinematicsAction):
+    def __init__(self, cfg: pink_actions_cfg.PinkInverseKinematicsActionCfg, env: ManagerBasedEnv):
+        super().__init__(cfg, env)
+    
+    @property
+    def action_dim(self) -> int:
+        """Dimension of the action space (based on number of tasks and pose dimension)."""
+        # Count only FrameTask instances in variable_input_tasks
+        frame_tasks_count = sum(
+            1 for task in self._ik_controllers[0].cfg.variable_input_tasks if isinstance(task, FrameTask)
+        )
+        return frame_tasks_count * self.pose_dim + self.cfg.controller.num_posture_controlled_joints
+    
+    def process_actions(self, actions: torch.Tensor) -> None:
+        """Process the input actions and set targets for each task.
+
+        Args:
+            actions: The input actions tensor.
+        """
+        # Store raw actions
+        self._raw_actions[:] = actions
+
+        # Extract hand joint positions directly (no cloning needed)
+        # self._target_hand_joint_positions = actions[:, -self.hand_joint_dim :]
+
+        # Extract posture controlled joint positions directly
+        target_posture_joint_positions = actions[0, -self.posture_controlled_joint_dim:].cpu().numpy()
+
+        # Get base link frame transformation
+        self.base_link_frame_in_world_rf = self._get_base_link_frame_transform()
+
+        # Process controlled frame poses (pass original actions, no clone needed)
+        controlled_frame_poses = self._extract_controlled_frame_poses(actions)
+        transformed_poses = self._transform_poses_to_base_link_frame(controlled_frame_poses)
+
+        # Set targets for all tasks
+        self._set_task_targets(controlled_frame_poses, transformed_poses,target_posture_joint_positions)
+
+    def apply_actions(self) -> None:
+        """Apply the computed joint positions based on the inverse kinematics solution."""
+        # Compute IK solutions for all environments
+        ik_joint_positions = self._compute_ik_solutions()
+
+        # Combine IK and hand joint positions
+        # all_joint_positions = torch.cat((ik_joint_positions, self._target_hand_joint_positions), dim=1)
+        self._processed_actions = ik_joint_positions
+
+        # Apply gravity compensation to arm joints
+        if self.cfg.enable_gravity_compensation:
+            self._apply_gravity_compensation()
+
+        # Apply joint position targets
+        self._asset.set_joint_position_target(self._processed_actions, self._controlled_joint_ids)
+
+    def _set_task_targets(self, poses_env: torch.Tensor, poses_base: tuple[torch.Tensor, torch.Tensor], target_posture_joint_positions: np.ndarray) -> None:
+        positions_env, rotations_env = math_utils.unmake_pose(poses_env)
+        positions_base, rotations_base = poses_base
+
+        for env_index, ik_controller in enumerate(self._ik_controllers):
+            for frame_task_index, task in enumerate(ik_controller.cfg.variable_input_tasks):
+
+                if isinstance(task, LocalFrameTask):
+                    target = task.transform_target_to_base
+                    positions = positions_base
+                    rotations = rotations_base
+
+                elif isinstance(task, FrameTask):
+                    target = task.transform_target_to_world
+                    positions = positions_env
+                    rotations = rotations_env
+                elif isinstance(task, NullSpacePostureTask):
+                    # code for setting posture target
+                    pink_joint_names = self._ik_controllers[0].pink_configuration.controlled_joint_names_pinocchio_order
+                    joint_positions = np.zeros(len(pink_joint_names))
+                    i=0
+                    for joint_name in task.controlled_joints:
+                        idx = pink_joint_names.index(joint_name)
+                        joint_positions[idx] = target_posture_joint_positions[i]
+                        i+=1
+                    task.set_target(joint_positions)
+                    continue
+                else:
+                    continue
+
+                target.translation = positions[frame_task_index, env_index, :].cpu().numpy()
+                target.rotation = rotations[frame_task_index, env_index, :, :].cpu().numpy()
+                task.set_target(target)

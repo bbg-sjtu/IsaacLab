@@ -11,3 +11,4 @@ This package provides integration between Pink inverse kinematics solver and Isa
 from .null_space_posture_task import NullSpacePostureTask
 from .pink_ik import PinkIKController
 from .pink_ik_cfg import PinkIKControllerCfg
+from.joint_coupling_task import JointCouplingTask
