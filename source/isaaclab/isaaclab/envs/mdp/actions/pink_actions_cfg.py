@@ -43,3 +43,20 @@ class PinkInverseKinematicsActionCfg(ActionTermCfg):
     This dictionary should map the task names (e.g., 'left_wrist', 'right_wrist') to the
     corresponding link names in the URDF that will be controlled by the IK solver.
     """
+
+@configclass
+class PinkInverseKinematicsActionCfg_NOHAND(PinkInverseKinematicsActionCfg):
+    """Pink IK action configuration for robots without separately controlled hand joints."""
+
+    class_type: type["PinkInverseKinematicsAction"] | str = (
+        "{DIR}.pink_task_space_actions:PinkInverseKinematicsAction_NOHAND"
+    )
+
+
+@configclass
+class PinkInverseKinematicsActionCfg_NullSpacePostureControl(PinkInverseKinematicsActionCfg_NOHAND):
+    """Pink IK action configuration with action-controlled null-space posture targets."""
+
+    class_type: type["PinkInverseKinematicsAction"] | str = (
+        "{DIR}.pink_task_space_actions:PinkInverseKinematicsAction_NullSpacePostureControl"
+    )

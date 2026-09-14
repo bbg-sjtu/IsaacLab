@@ -5,12 +5,14 @@
 
 __all__ = [
     "NullSpacePostureTask",
+    "JointCouplingTask",
     "PinkIKController",
     "PinkIKControllerCfg",
     "DampingTaskCfg",
     "FrameTaskCfg",
     "LocalFrameTaskCfg",
     "NullSpacePostureTaskCfg",
+    "JointCouplingTaskCfg",
     "PinkIKTaskCfg",
     "DampingTask",
     "FrameTask",
@@ -19,12 +21,14 @@ __all__ = [
 ]
 
 from .null_space_posture_task import NullSpacePostureTask
+from .joint_coupling_task import JointCouplingTask
 from .pink_ik import PinkIKController
 from .pink_ik_cfg import PinkIKControllerCfg
 from .pink_task_cfg import (
     DampingTaskCfg,
     FrameTaskCfg,
     LocalFrameTaskCfg,
+    JointCouplingTaskCfg,
     NullSpacePostureTaskCfg,
     PinkIKTaskCfg,
 )

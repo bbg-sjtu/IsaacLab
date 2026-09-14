@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+import numpy as np
 import torch
 from pink.tasks import FrameTask
 
@@ -15,6 +16,7 @@ import isaaclab.utils.math as math_utils
 from isaaclab.assets.articulation import Articulation
 from isaaclab.controllers.pink_ik import PinkIKController
 from isaaclab.controllers.pink_ik.pink_tasks import LocalFrameTask
+from isaaclab.controllers.pink_ik.null_space_posture_task import NullSpacePostureTask
 from isaaclab.managers.action_manager import ActionTerm
 
 if TYPE_CHECKING:
@@ -120,6 +122,11 @@ class PinkInverseKinematicsAction(ActionTerm):
     def hand_joint_dim(self) -> int:
         """Dimension for hand joint positions."""
         return self.cfg.controller.num_hand_joints
+
+    @property
+    def posture_controlled_joint_dim(self) -> int:
+        """Dimension for controlled posture joint positions."""
+        return self.cfg.controller.num_posture_controlled_joints
 
     @property
     def position_dim(self) -> int:
@@ -369,3 +376,116 @@ class PinkInverseKinematicsAction(ActionTerm):
             env_ids: A list of environment IDs to reset. If None, all environments are reset.
         """
         self._raw_actions[env_ids] = torch.zeros(self.action_dim, device=self.device)
+
+class PinkInverseKinematicsAction_NOHAND(PinkInverseKinematicsAction):
+    """Pink IK action for robots without separately controlled hand joints."""
+
+    def process_actions(self, actions: torch.Tensor) -> None:
+        """Process end-effector pose targets from the input action."""
+        self._raw_actions[:] = actions
+        self.base_link_frame_in_world_rf = self._get_base_link_frame_transform()
+        poses_env = self._extract_controlled_frame_poses(actions)
+        poses_base = self._transform_poses_to_base_link_frame(poses_env)
+        self._set_frame_task_targets(poses_env, poses_base)
+
+    def apply_actions(self) -> None:
+        """Solve IK and write the resulting position targets to the articulation."""
+        self._processed_actions = self._compute_ik_solutions()
+        if self.cfg.enable_gravity_compensation:
+            self._apply_gravity_compensation()
+        self._asset.set_joint_position_target_index(
+            target=self._processed_actions, joint_ids=self._controlled_joint_ids
+        )
+
+    def _set_frame_task_targets(
+        self, poses_env: torch.Tensor, poses_base: tuple[torch.Tensor, torch.Tensor]
+    ) -> None:
+        """Set world- or base-relative targets for all frame tasks."""
+        positions_env, rotations_env = math_utils.unmake_pose(poses_env)
+        positions_base, rotations_base = poses_base
+
+        for env_index, ik_controller in enumerate(self._ik_controllers):
+            frame_task_index = 0
+            for task in ik_controller._variable_input_tasks:
+                if isinstance(task, LocalFrameTask):
+                    target = task.transform_target_to_base
+                    positions = positions_base
+                    rotations = rotations_base
+                elif isinstance(task, FrameTask):
+                    target = task.transform_target_to_world
+                    positions = positions_env
+                    rotations = rotations_env
+                else:
+                    continue
+
+                if target is None:
+                    raise RuntimeError(f"Pink task target for '{task.frame}' was not initialized.")
+                target.translation = positions[frame_task_index, env_index].cpu().numpy()
+                target.rotation = rotations[frame_task_index, env_index].cpu().numpy()
+                task.set_target(target)
+                frame_task_index += 1
+
+
+class PinkInverseKinematicsAction_NullSpacePostureControl(PinkInverseKinematicsAction_NOHAND):
+    """Pink IK action with one independent posture target per replicated environment."""
+
+    @property
+    def action_dim(self) -> int:
+        """Number of frame-pose values plus null-space posture targets."""
+        return self._num_frame_tasks * self.pose_dim + self.posture_controlled_joint_dim
+
+    def process_actions(self, actions: torch.Tensor) -> None:
+        """Process frame poses and per-environment posture targets."""
+        self._raw_actions[:] = actions
+        posture_targets = actions[:, -self.posture_controlled_joint_dim :].cpu().numpy()
+        self.base_link_frame_in_world_rf = self._get_base_link_frame_transform()
+        poses_env = self._extract_controlled_frame_poses(actions)
+        poses_base = self._transform_poses_to_base_link_frame(poses_env)
+        self._set_frame_and_posture_targets(poses_env, poses_base, posture_targets)
+
+    def _set_frame_and_posture_targets(
+        self,
+        poses_env: torch.Tensor,
+        poses_base: tuple[torch.Tensor, torch.Tensor],
+        posture_targets: np.ndarray,
+    ) -> None:
+        """Update frame tasks and map posture values into Pinocchio joint order."""
+        positions_env, rotations_env = math_utils.unmake_pose(poses_env)
+        positions_base, rotations_base = poses_base
+
+        for env_index, ik_controller in enumerate(self._ik_controllers):
+            frame_task_index = 0
+            for task in ik_controller._variable_input_tasks:
+                if isinstance(task, LocalFrameTask):
+                    target = task.transform_target_to_base
+                    positions = positions_base
+                    rotations = rotations_base
+                elif isinstance(task, FrameTask):
+                    target = task.transform_target_to_world
+                    positions = positions_env
+                    rotations = rotations_env
+                elif isinstance(task, NullSpacePostureTask):
+                    pink_joint_names = ik_controller.pink_configuration.controlled_joint_names_pinocchio_order
+                    if len(task.controlled_joints) != posture_targets.shape[1]:
+                        raise ValueError(
+                            "Posture action size does not match NullSpacePostureTask.controlled_joints: "
+                            f"{posture_targets.shape[1]} != {len(task.controlled_joints)}"
+                        )
+                    joint_positions = ik_controller.init_joint_positions.copy()
+                    for target_index, joint_name in enumerate(task.controlled_joints):
+                        try:
+                            pink_index = pink_joint_names.index(joint_name)
+                        except ValueError as exc:
+                            raise ValueError(f"Posture joint '{joint_name}' is not controlled by Pink.") from exc
+                        joint_positions[pink_index] = posture_targets[env_index, target_index]
+                    task.set_target(joint_positions)
+                    continue
+                else:
+                    continue
+
+                if target is None:
+                    raise RuntimeError(f"Pink task target for '{task.frame}' was not initialized.")
+                target.translation = positions[frame_task_index, env_index].cpu().numpy()
+                target.rotation = rotations[frame_task_index, env_index].cpu().numpy()
+                task.set_target(target)
+                frame_task_index += 1

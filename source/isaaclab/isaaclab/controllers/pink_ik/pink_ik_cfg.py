@@ -52,6 +52,9 @@ class PinkIKControllerCfg:
     The last ``num_hand_joints`` values of the action are the hand joint angles.
     """
 
+    num_posture_controlled_joints: int = 0
+    """Number of joint targets appended to the action for a null-space posture task."""
+
     variable_input_tasks: list[Task | PinkIKTaskCfg] = field(default_factory=list)
     """A list of tasks for the Pink IK controller.
 

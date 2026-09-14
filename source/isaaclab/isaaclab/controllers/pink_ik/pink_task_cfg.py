@@ -120,3 +120,29 @@ class NullSpacePostureTaskCfg(PinkIKTaskCfg):
 
     class_type: str | type | None = "{DIR}.null_space_posture_task:NullSpacePostureTask"
     """Default builder pointing to :class:`NullSpacePostureTask`."""
+
+
+@configclass
+class JointCouplingTaskCfg(PinkIKTaskCfg):
+    r"""Configuration for a soft :math:`q_1 + q_2 + q_3 = 0` coupling task."""
+
+    joint1: str = MISSING
+    """First scalar joint name."""
+
+    joint2: str = MISSING
+    """Second scalar joint name."""
+
+    joint3: str = MISSING
+    """Third scalar joint name."""
+
+    cost: float = 1.0
+    """Task cost."""
+
+    gain: float = 0.5
+    """Task gain."""
+
+    lm_damping: float = 1.0
+    """Levenberg-Marquardt damping."""
+
+    class_type: str | type | None = "{DIR}.joint_coupling_task:JointCouplingTask"
+    """Default builder pointing to :class:`JointCouplingTask`."""
