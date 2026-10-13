@@ -279,6 +279,17 @@ def _ensure_cuda_torch() -> None:
     cuda_tag = f"cu{cuda_ver}"
     index_url = f"{base_index}/{cuda_tag}"
 
+    # Respect the installed Sim wheel's exact ML requirements. Its pip release
+    # can differ from the development image's default PyTorch version above.
+    sim_torch_requirements = [
+        requirement
+        for requirement in _get_installed_distribution_requirements(python_exe, "isaacsim-core")
+        if re.fullmatch(r"(?:torch|torchvision|torchaudio)==[0-9.]+", requirement)
+    ]
+    if sim_torch_requirements:
+        run_command(pip_cmd + ["install", "--index-url", index_url, *sim_torch_requirements])
+        return
+
     want_torch = f"{torch_ver}+{cuda_tag}"
 
     # Check current torch version using pip show (includes build tags).

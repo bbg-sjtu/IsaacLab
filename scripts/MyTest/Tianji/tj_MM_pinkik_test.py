@@ -115,6 +115,9 @@ def main():
     # 姿态保持不变，注意这里沿用你原来的四元数顺序
     quat_L = torch.tensor([-0.0222, -0.7344, -0.0244, -0.6779], dtype=torch.float32, device=device)
     quat_R = torch.tensor([ 0.0222, -0.7344,  0.0244, -0.6779], dtype=torch.float32, device=device)
+    # Isaac Lab 3 uses xyzw; the saved TianJi targets above use Lab 2's wxyz.
+    quat_L = quat_L[[1, 2, 3, 0]]
+    quat_R = quat_R[[1, 2, 3, 0]]
 
     # 最后4个指令保持不变
     joint_cmd = torch.tensor([0.0, -0.7, 1.2, -0.5, 0.0, 0.0], dtype=torch.float32, device=device)
@@ -160,8 +163,8 @@ def main():
         env.step(action)
 
         # 可视化实际末端
-        ee_L_pose_w = env.scene["robot"].data.body_state_w[:, robot_entity_cfg.body_ids[0], 0:7]
-        ee_R_pose_w = env.scene["robot"].data.body_state_w[:, robot_entity_cfg.body_ids[1], 0:7]
+        ee_L_pose_w = env.scene["robot"].data.body_link_pose_w.torch[:, robot_entity_cfg.body_ids[0]]
+        ee_R_pose_w = env.scene["robot"].data.body_link_pose_w.torch[:, robot_entity_cfg.body_ids[1]]
 
         ee_marker_L.visualize(ee_L_pose_w[:, 0:3], ee_L_pose_w[:, 3:7])
         ee_marker_R.visualize(ee_R_pose_w[:, 0:3], ee_R_pose_w[:, 3:7])

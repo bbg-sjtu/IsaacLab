@@ -1,0 +1,719 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="MOZ1_WBC">
+  <link name="world_base">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <link name="base_x_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <link name="base_y_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.001" />
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+    </inertial>
+  </link>
+  <joint name="dummy_x_joint" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="world_base" />
+    <child link="base_x_link" />
+    <axis xyz="1 0 0" />
+    <limit lower="-2.0" upper="2.0" effort="5000" velocity="1.0" />
+    <dynamics damping="10" friction="0" />
+  </joint>
+  <joint name="dummy_y_joint" type="prismatic">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_x_link" />
+    <child link="base_y_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.0" upper="2.0" effort="5000" velocity="1.0" />
+    <dynamics damping="10" friction="0" />
+  </joint>
+  <joint name="dummy_yaw_joint" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_y_link" />
+    <child link="base_link" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.141592654" upper="3.141592654" effort="5000" velocity="1.5" />
+    <dynamics damping="10" friction="0" />
+  </joint>
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/base_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel01">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Base_0" type="fixed">
+    <origin xyz="0.2423 0.2423 0" rpy="0 0 2.35619449" />
+    <parent link="base_link" />
+    <child link="wheel01" />
+  </joint>
+  <link name="wheel02">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Base_1" type="fixed">
+    <origin xyz="-0.2423 0.2423 0" rpy="0 0 -2.35619449" />
+    <parent link="base_link" />
+    <child link="wheel02" />
+  </joint>
+  <link name="wheel03">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Base_2" type="fixed">
+    <origin xyz="-0.2423 -0.2423 0" rpy="0 0 -0.785398163" />
+    <parent link="base_link" />
+    <child link="wheel03" />
+  </joint>
+  <link name="wheel04">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Base_3" type="fixed">
+    <origin xyz="0.2423 -0.2423 0" rpy="0 0 0.785398163" />
+    <parent link="base_link" />
+    <child link="wheel04" />
+  </joint>
+  <link name="leg01">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg01.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg01.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_0" type="revolute">
+    <origin xyz="0 0.1114 0.1875" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="leg01" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.523598776" upper="0.523598776" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="leg02">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg02.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg02.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_1" type="revolute">
+    <origin xyz="0 0 0.122" rpy="0 0 0" />
+    <parent link="leg01" />
+    <child link="leg02" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.570796327" upper="1.570796327" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="leg03">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg03.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/leg03.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_2" type="revolute">
+    <origin xyz="0 0 0.285" rpy="0 0 0" />
+    <parent link="leg02" />
+    <child link="leg03" />
+    <axis xyz="1 0 0" />
+    <limit lower="-2.530727415" upper="0.017453293" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="waist01">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist01.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist01.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_3" type="revolute">
+    <origin xyz="0 0 0.318" rpy="0 0 0" />
+    <parent link="leg03" />
+    <child link="waist01" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.174532925" upper="1.396263402" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="waist02">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist02.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.89804 0.91765 0.92941 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist02.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_4" type="revolute">
+    <origin xyz="0 0 0.12" rpy="0 0 0" />
+    <parent link="waist01" />
+    <child link="waist02" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.523598776" upper="0.523598776" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="waist03">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist03.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/waist03.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LegWaist_5" type="revolute">
+    <origin xyz="0 0 0.1019" rpy="0 0 0" />
+    <parent link="waist02" />
+    <child link="waist03" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.141592654" upper="3.141592654" effort="1000" velocity="1.134464" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left01">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left01.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left01.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_0" type="revolute">
+    <origin xyz="0.1257 0 0.2531" rpy="0 0 0" />
+    <parent link="waist03" />
+    <child link="left01" />
+    <axis xyz="1 0 0" />
+    <limit lower="-3.141592654" upper="2.094395102" effort="1000" velocity="3.665191" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left02">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left02.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left02.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_1" type="revolute">
+    <origin xyz="0.079 0 0" rpy="0 0 0" />
+    <parent link="left01" />
+    <child link="left02" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.967059728" upper="0.157079633" effort="1000" velocity="3.665191" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left03">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left03.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left03.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_2" type="revolute">
+    <origin xyz="0 0 -0.113" rpy="0 0 0" />
+    <parent link="left02" />
+    <child link="left03" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.054326191" upper="3.054326191" effort="1000" velocity="4.18879" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left04">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left04.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left04.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_3" type="revolute">
+    <origin xyz="0 0 -0.187" rpy="0 0 0" />
+    <parent link="left03" />
+    <child link="left04" />
+    <axis xyz="1 0 0" />
+    <limit lower="-2.251474735" upper="0.174532925" effort="1000" velocity="4.18879" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left05">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left05.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left05.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_4" type="revolute">
+    <origin xyz="0 0 -0.101" rpy="0 0 0" />
+    <parent link="left04" />
+    <child link="left05" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.054326191" upper="3.054326191" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left06">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left06.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left06.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_5" type="revolute">
+    <origin xyz="0 0 -0.159" rpy="0 0 0" />
+    <parent link="left05" />
+    <child link="left06" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.658062789" upper="1.658062789" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="left07">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left07.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/left07.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="LeftArm_6" type="revolute">
+    <origin xyz="0 0 -0.0905" rpy="0 0 0" />
+    <parent link="left06" />
+    <child link="left07" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.570796327" upper="1.570796327" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right01">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right01.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right01.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_0" type="revolute">
+    <origin xyz="-0.1257 0 0.2531" rpy="0 0 3.14159265359" />
+    <parent link="waist03" />
+    <child link="right01" />
+    <axis xyz="1 0 0" />
+    <limit lower="-2.094395102" upper="3.141592654" effort="1000" velocity="3.665191" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right02">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right02.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right02.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_1" type="revolute">
+    <origin xyz="0.079 0 0" rpy="0 0 0" />
+    <parent link="right01" />
+    <child link="right02" />
+    <axis xyz="0 1 0" />
+    <limit lower="-2.967059728" upper="0.157079633" effort="1000" velocity="3.665191" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right03">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right03.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right03.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_2" type="revolute">
+    <origin xyz="0 0 -0.113" rpy="0 0 0" />
+    <parent link="right02" />
+    <child link="right03" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.054326191" upper="3.054326191" effort="1000" velocity="4.18879" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right04">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right04.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right04.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_3" type="revolute">
+    <origin xyz="0 0 -0.187" rpy="0 0 0" />
+    <parent link="right03" />
+    <child link="right04" />
+    <axis xyz="1 0 0" />
+    <limit lower="-0.174532925" upper="2.251474735" effort="1000" velocity="4.18879" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right05">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right05.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right05.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_4" type="revolute">
+    <origin xyz="0 0 -0.101" rpy="0 0 0" />
+    <parent link="right04" />
+    <child link="right05" />
+    <axis xyz="0 0 1" />
+    <limit lower="-3.054326191" upper="3.054326191" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right06">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right06.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right06.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_5" type="revolute">
+    <origin xyz="0 0 -0.159" rpy="0 0 0" />
+    <parent link="right05" />
+    <child link="right06" />
+    <axis xyz="0 1 0" />
+    <limit lower="-1.658062789" upper="1.658062789" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="right07">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right07.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 -3.14159265359" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/right07.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="RightArm_6" type="revolute">
+    <origin xyz="0 0 -0.0905" rpy="0 0 0" />
+    <parent link="right06" />
+    <child link="right07" />
+    <axis xyz="1 0 0" />
+    <limit lower="-1.570796327" upper="1.570796327" effort="1000" velocity="5.235988" />
+    <dynamics damping="1" friction="0" />
+  </joint>
+  <link name="head21">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head21.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head21.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Head_0" type="fixed">
+    <origin xyz="0 0 0.3491" rpy="0 0 0" />
+    <parent link="waist03" />
+    <child link="head21" />
+  </joint>
+  <link name="head22">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head22.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head22.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Head_1" type="fixed">
+    <origin xyz="0 0 0.103" rpy="0 0 0" />
+    <parent link="head21" />
+    <child link="head22" />
+  </joint>
+  <link name="head23">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head23.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.8 0.8 0.8 1.0" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://spirit01_model/meshes/head23.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="Head_2" type="fixed">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="head22" />
+    <child link="head23" />
+  </joint>
+</robot>

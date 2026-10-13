@@ -146,3 +146,27 @@ class JointCouplingTaskCfg(PinkIKTaskCfg):
 
     class_type: str | type | None = "{DIR}.joint_coupling_task:JointCouplingTask"
     """Default builder pointing to :class:`JointCouplingTask`."""
+
+
+@configclass
+class WaistTaskCfg(JointCouplingTaskCfg):
+    """Soft zero-sum and directional preferences for three scalar waist joints.
+
+    All joint names and preferences are explicit. This task adds costs, not hard
+    QP constraints. For angular joints, the residuals are measured in [rad].
+    """
+
+    cost: float = 5.0
+    """Weight of the joint-sum residual [cost/rad]; zero disables this preference."""
+
+    sign_cost: float = 5.0
+    """Weight of each sign-violation residual [cost/rad]; zero disables sign preferences."""
+
+    joint_signs: tuple[int, int, int] = (1, -1, 1)
+    """Preferred signs: +1 for nonnegative, -1 for nonpositive, 0 for unrestricted."""
+
+    lm_damping: float = 0.0
+    """Dimensionless error-dependent regularization scale."""
+
+    class_type: str | type | None = "{DIR}.waist_task:WaistTask"
+    """Builder for :class:`WaistTask`; no controller-specific injection is needed."""

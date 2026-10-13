@@ -15,8 +15,8 @@ from pink.tasks import FrameTask
 import isaaclab.utils.math as math_utils
 from isaaclab.assets.articulation import Articulation
 from isaaclab.controllers.pink_ik import PinkIKController
-from isaaclab.controllers.pink_ik.pink_tasks import LocalFrameTask
 from isaaclab.controllers.pink_ik.null_space_posture_task import NullSpacePostureTask
+from isaaclab.controllers.pink_ik.pink_tasks import LocalFrameTask
 from isaaclab.managers.action_manager import ActionTerm
 
 if TYPE_CHECKING:
@@ -377,6 +377,7 @@ class PinkInverseKinematicsAction(ActionTerm):
         """
         self._raw_actions[env_ids] = torch.zeros(self.action_dim, device=self.device)
 
+
 class PinkInverseKinematicsAction_NOHAND(PinkInverseKinematicsAction):
     """Pink IK action for robots without separately controlled hand joints."""
 
@@ -397,9 +398,7 @@ class PinkInverseKinematicsAction_NOHAND(PinkInverseKinematicsAction):
             target=self._processed_actions, joint_ids=self._controlled_joint_ids
         )
 
-    def _set_frame_task_targets(
-        self, poses_env: torch.Tensor, poses_base: tuple[torch.Tensor, torch.Tensor]
-    ) -> None:
+    def _set_frame_task_targets(self, poses_env: torch.Tensor, poses_base: tuple[torch.Tensor, torch.Tensor]) -> None:
         """Set world- or base-relative targets for all frame tasks."""
         positions_env, rotations_env = math_utils.unmake_pose(poses_env)
         positions_base, rotations_base = poses_base
@@ -432,7 +431,11 @@ class PinkInverseKinematicsAction_NullSpacePostureControl(PinkInverseKinematicsA
     @property
     def action_dim(self) -> int:
         """Number of frame-pose values plus null-space posture targets."""
-        return self._num_frame_tasks * self.pose_dim + self.posture_controlled_joint_dim
+        # The base constructor queries this before initializing helper tensors.
+        frame_tasks_count = sum(
+            isinstance(task, FrameTask) for task in self._ik_controllers[0].cfg.variable_input_tasks
+        )
+        return frame_tasks_count * self.pose_dim + self.posture_controlled_joint_dim
 
     def process_actions(self, actions: torch.Tensor) -> None:
         """Process frame poses and per-environment posture targets."""

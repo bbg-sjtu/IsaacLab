@@ -47,7 +47,7 @@ INSTALL_REQUIRES = [
     "pytest",
     "pytest-mock",
     "junitparser",
-    "coverage==7.6.1",
+    "coverage>=7.4.4,<8",  # Isaac Sim 6.0 pip wheels require 7.4.4.
     "debugpy>=1.8.20",
     "flatdict>=4.1.0",
     "flaky",
@@ -73,7 +73,8 @@ INSTALL_REQUIRES += [
 ]
 # Adds OpenUSD dependencies based on architecture for Kit less mode.
 INSTALL_REQUIRES += [
-    f"usd-core>=25.11,<26.0 ; ({SUPPORTED_ARCHS})",
+    # usd-exchange supplies pxr and its matching native USD libraries. Installing
+    # usd-core alongside it overwrites pxr with a different USD ABI.
     f"usd-exchange>=2.2 ; ({SUPPORTED_ARCHS_ARM})",
 ]
 
@@ -102,9 +103,9 @@ PYTORCH_INDEX_URL = ["https://download.pytorch.org/whl/cu128"]
 # Use ``pip install isaaclab[isaacsim]`` to add Isaac Sim, or
 # ``pip install isaaclab[all]`` to pull in all sub-packages and extras.
 EXTRAS_REQUIRE = {
-    "isaacsim": ["isaacsim[all,extscache]==5.1.0"],
+    "isaacsim": ["isaacsim[all,extscache]==6.0.0.1"],
     "all": [
-        "isaacsim[all,extscache]==5.1.0",
+        "isaacsim[all,extscache]==6.0.0.1",
         "isaaclab_assets",
         "isaaclab_contrib",
         "isaaclab_experimental",

@@ -360,6 +360,36 @@ class TestEnsureCudaTorch:
     - Torch state:   already installed at correct version; wrong CUDA tag; not installed
     """
 
+    @pytest.fixture(autouse=True)
+    def sim_requirements(self):
+        with mock.patch(
+            "isaaclab.cli.commands.install._get_installed_distribution_requirements", return_value=[]
+        ) as requirements:
+            yield requirements
+
+    def test_respects_installed_sim_pins(self, sim_requirements):
+        sim_requirements.return_value = ["torch==2.11.0", "torchvision==0.26.0", "torchaudio==2.11.0", "numpy==2.3.1"]
+        with (
+            mock.patch("isaaclab.cli.commands.install.extract_python_exe", return_value="python"),
+            mock.patch("isaaclab.cli.commands.install.get_pip_command", return_value=["python", "-m", "pip"]),
+            mock.patch("isaaclab.cli.commands.install.is_arm", return_value=False),
+            mock.patch("isaaclab.cli.commands.install.run_command") as run,
+        ):
+            _ensure_cuda_torch()
+        run.assert_called_once_with(
+            [
+                "python",
+                "-m",
+                "pip",
+                "install",
+                "--index-url",
+                "https://download.pytorch.org/whl/cu128",
+                "torch==2.11.0",
+                "torchvision==0.26.0",
+                "torchaudio==2.11.0",
+            ]
+        )
+
     # ---- x86 scenarios -------------------------------------------------------
 
     def test_x86_skips_install_when_correct_version_present(self, tmp_path):

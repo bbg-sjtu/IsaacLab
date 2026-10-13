@@ -64,3 +64,12 @@ Available Pink IK Tasks
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autoclass:: NullSpacePostureTask
+
+.. autoclass:: WaistTaskCfg
+    :members:
+    :show-inheritance:
+    :exclude-members: __init__, class_type
+
+.. autoclass:: WaistTask
+    :members:
+    :show-inheritance:
